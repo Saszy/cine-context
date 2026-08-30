@@ -1,0 +1,15 @@
+.venv/
+venv/
+.env
+__pycache__/
+*.py[cod]
+*.egg-info/
+.DS_Store
+.pytest_cache/
+data/enriched.db
+data/llm_query_cache.json
+data/llm_query_cache.json.tmp
+data/query_traces.jsonl
+.chainlit/*
+!.chainlit/config.toml
+.files/
