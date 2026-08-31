@@ -27,19 +27,6 @@ chainlit run app.py
 
 `--prefer-llm` uses OpenAI if `OPENAI_API_KEY` is set, otherwise a documented heuristic. `--llm` fails closed if the key is missing. After changing `.env` or code, **restart** Chainlit (an old process on port 8000 will keep serving the previous behavior). Repeat questions are served from `data/llm_query_cache.json` (gitignored); set `LLM_CACHE=0` to force a fresh model call.
 
-## What I found in the data (vs the brief)
-
-Two SQLite files, not one:
-
-| File | Table | Rows |
-|------|--------|------|
-| `db/movies.db` | `movies` | 45,430 |
-| `db/ratings.db` | `ratings` | 100,004 ratings / 671 users / 9,066 movie IDs |
-
-The brief describes pipe-separated genres and companies. This dump stores **JSON arrays** of `{id, name}`. The `language` column is **empty on every row**.
-
-`movieId` is not a reliable join. Only 2,830 of 9,066 rated IDs exist in `movies`. MovieLens `296` (usually Pulp Fiction) joins to TMDB `296` (Terminator 3). There is no IMDb key on `ratings`. The pipeline inner-joins on `movieId` for ratings, samples only IDs that exist on both sides, and treats unmatched / unverified titles as noisy.
-
 ## Data preparation
 
 80 **Released** titles with overview, budget, revenue, and at least 5 joined ratings (~627 candidates). Sampling is **stratified by primary genre** (seed 42).
@@ -226,21 +213,3 @@ Users with many joined ratings for summaries: **564**, **547**, **15**. Compare 
 | `tests/` | Pytest edge coverage |
 | `.env.example` | `OPENAI_API_KEY`, `OPENAI_MODEL`, `LLM_CACHE`, `OBSERVE` |
 
-## Choices I did not make
-
-- **Python 3** rather than TypeScript: sqlite3 is built in.
-- **No pandas / numpy**: 80 rows; stdlib + SQL is enough.
-- **No embeddings / LangChain**: retrieve-then-generate is cheaper and easier to audit.
-- **gpt-4o-mini** default (`OPENAI_MODEL` to override).
-- **Heuristic fallback** so `prepare` / `ask` / `eval` / pytest work without a paid key.
-- **Query-level disk cache** rather than a per-token LLM gateway: one key per question is enough for the demo, and a catalog fingerprint invalidates it if the 80-row set changes.
-- **Local JSONL traces** rather than LangSmith/OTel: same audit style as the enrichment JSON, and the reviewer can `cat` the file or run `python -m movie_system traces`.
-- **CustomElement chips** rather than Chainlit `Action`s: actions crash on this Python 3.9 + Chainlit 2.3 stack when they send a message.
-- **No MovieLens↔TMDB map** — not in the dump; documented instead of faked.
-
-## Assumptions
-
-1. Inner-join ratings on `movieId` and treat mismatches as a caveat, not a blocker.
-2. Recommendations / compare / search stay inside the 80 enriched movies. User summaries may load joined `movies` rows outside the 80 but only **verified** titles (in the sample) are used as preference evidence.
-3. Chainlit is the demo UI; CLI `ask` remains for JSON and scripts.
-4. A CLI/eval path is enough to prove the system if the reviewer does not run the chat UI.

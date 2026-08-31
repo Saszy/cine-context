@@ -31,9 +31,6 @@ python -m movie_system eval
 ```
 
 Design notes (data, prompts, guardrails): [SOLUTION.md](SOLUTION.md).
-
-To replace the screenshot: capture the chat window, save it as `docs/chat.png`, and commit that file. GitHub will render it from the markdown above.
-
 ---
 
 ## Pre-requisites
