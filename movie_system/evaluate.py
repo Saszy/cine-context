@@ -133,16 +133,50 @@ def evaluate_system(movies: list[EnrichedMovie], *, use_llm: bool) -> EvalReport
         ok, detail = _intent_ok(case["query"], case, use_llm=False)
         report.add(f"intent::{case['task']}::{case['query'][:32]}", ok, detail)
 
-    demo = GOLDEN_INTENTS[0]["query"]
-    intent, response, retrieved = run_query(demo, movies, use_llm=use_llm)
+    rec_q = GOLDEN_INTENTS[0]["query"]
+    intent, response, retrieved = run_query(rec_q, movies, use_llm=use_llm)
     allowed = {m.movie_id for m in retrieved}
-    grounded = all(item.movie_id in allowed for item in response.movies) if response.movies else True
+    grounded = (
+        all(item.movie_id in allowed for item in response.movies)
+        if response.movies
+        else True
+    )
     report.add("recommend_grounded_ids", grounded, f"k={len(response.movies)}")
     report.add("recommend_nonempty_answer", bool(response.answer.strip()))
     report.add("intent_is_recommend", intent.task == "recommend", intent.task)
 
     _, user_resp, _ = run_query(GOLDEN_INTENTS[1]["query"], movies, use_llm=use_llm)
     report.add("user_summary_nonempty", bool(user_resp.answer.strip()), user_resp.task)
+
+    cmp_q = GOLDEN_INTENTS[2]["query"]
+    _, cmp_resp, cmp_hits = run_query(cmp_q, movies, use_llm=use_llm)
+    cmp_text = cmp_resp.answer.lower()
+    report.add("compare_retrieves_quoted_titles", len(cmp_hits) == 2, f"n={len(cmp_hits)}")
+    report.add("compare_mentions_budget", "budget" in cmp_text)
+    report.add("compare_mentions_revenue", "revenue" in cmp_text)
+    report.add(
+        "compare_mentions_runtime",
+        "runtime" in cmp_text or " min" in cmp_text,
+    )
+
+    _, _, unknown_hits = run_query(
+        "Compare budget of 'The Dark Knight' and 'Inception'",
+        movies,
+        use_llm=use_llm,
+    )
+    report.add("compare_unknown_titles_empty", unknown_hits == [])
+
+    _, pred_resp, _ = run_query(
+        "Predict the rating user 15 would give 'Pulp Fiction'",
+        movies,
+        use_llm=use_llm,
+    )
+    rating = pred_resp.predicted_rating
+    report.add(
+        "predict_rating_in_range",
+        rating is not None and 0.5 <= float(rating) <= 5,
+        str(rating),
+    )
     return report
 
 

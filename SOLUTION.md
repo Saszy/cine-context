@@ -154,7 +154,7 @@ Implemented in [movie_system/guardrails.py](movie_system/guardrails.py) and appl
 
 ## Tests
 
-`python -m pytest tests` — **56** offline tests (no API key), including:
+`python -m pytest tests` — **57** offline tests (no API key), including:
 
 - Schema / `"null"` intent fields
 - Golden brief intents
@@ -166,7 +166,8 @@ Implemented in [movie_system/guardrails.py](movie_system/guardrails.py) and appl
 - Repeat-query cache hit (no second LLM call); case/spacing share a key
 - Chainlit `local_steps` ContextVar default in an empty context
 - Request traces (spans, redacted secret queries, JSONL emit)
-- Full `python -m movie_system eval` suite
+- SQLite sample pool (`JOIN` ratings, `GROUP BY` / `HAVING`)
+- Full `python -m movie_system eval` suite (24 checks: enrich, intents, compare budget/revenue/runtime, predict clamp)
 
 ## Demo queries
 
@@ -202,7 +203,7 @@ Users with many joined ratings for summaries: **564**, **547**, **15**. Compare 
 
 | Path | Role |
 |------|------|
-| `README.md` | Unchanged original brief |
+| `README.md` | Original brief (points here for how to run) |
 | `DATA_PREPARATION.md` | Enrichment decision record |
 | `MOVIE_SYSTEM.md` | System decision record |
 | `db/movies.db`, `db/ratings.db` | Read-only source data |

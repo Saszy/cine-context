@@ -1,4 +1,40 @@
-# Movie Systems Design 
+# Movie Systems Design
+
+![Chainlit movie assistant](docs/chat.png)
+
+## How to run
+
+Python 3.9+. The 80-movie catalog is already in `data/enriched_movies.json`, so you can chat without re-running prepare.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+cp .env.example .env
+# optional: add OPENAI_API_KEY to .env  (never commit .env)
+
+chainlit run app.py
+```
+
+Open [http://localhost:8000](http://localhost:8000). Use a starter chip, or type a question.
+
+- **With a key:** model-written answers (footer shows `OpenAI` or `OpenAI (cached)`).
+- **Without a key:** heuristic answers still run (footer shows `heuristic`).
+- After you change `.env`, restart Chainlit.
+
+Optional checks:
+
+```bash
+python -m pytest tests
+python -m movie_system eval
+```
+
+Design notes (data, prompts, guardrails): [SOLUTION.md](SOLUTION.md).
+
+To replace the screenshot: capture the chat window, save it as `docs/chat.png`, and commit that file. GitHub will render it from the markdown above.
+
+---
 
 ## Pre-requisites
 

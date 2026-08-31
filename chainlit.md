@@ -1,4 +1,4 @@
-# Movie catalog assistant
+# Cine Context
 
 Chat against the 80-movie enriched catalog. Use a starter below, or tap a suggested chip after any answer.
 

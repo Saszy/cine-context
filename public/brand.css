@@ -1,0 +1,6 @@
+img.logo {
+  height: 32px !important;
+  width: auto !important;
+  max-width: min(280px, 75vw) !important;
+  object-fit: contain !important;
+}
